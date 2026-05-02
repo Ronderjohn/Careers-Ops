@@ -1,0 +1,81 @@
+# Career-Ops Profile — Abhay Santhani
+# Single source of truth for modes, evaluations, and PDFs.
+
+candidate:
+  full_name: "Abhay Santhani"
+  email: "abhaysanthani@gmail.com"
+  phone: "+91-8374162770"
+  location: "Hyderabad, Telangana, India"
+  linkedin: "linkedin.com/in/abhay-santhani"
+  portfolio_url: "https://www.linkedin.com/in/abhay-santhani"
+  github: "github.com/Ronderjohn"
+
+target_roles:
+  primary:
+    - "Applied AI Engineer"
+    - "ML Engineer (LLM / GenAI)"
+    - "AI Engineer — Data & LLM Platforms"
+  archetypes:
+    - name: "AI/ML Engineer"
+      level: "Mid–Senior"
+      fit: "primary"
+    - name: "ML Platform / Data Engineer (AI)"
+      level: "Mid–Senior"
+      fit: "secondary"
+    - name: "Solutions Engineer — AI / Analytics"
+      level: "Mid-Senior"
+      fit: "adjacent"
+
+narrative:
+  headline: "Applied artificial intelligence engineer specializing in production LLM systems, regulatory-scale data infrastructure, and agentic automation."
+  exit_story: >
+    Over the past two years, I have designed and delivered production-grade large language model systems across
+    regulated pharmaceutical corpora and financial services. My work spans end-to-end LLM training data pipelines
+    (layout-aware document ingestion, quality assurance, versioning on cloud object storage, and instruction-tuning
+    dataset generation), retrieval-augmented analyst workflows with vector databases and traceable model outputs, and
+    multi-agent orchestration using contemporary frameworks. I hold a Bachelor of Technology in Artificial Intelligence
+    (Dean's Medal for Outstanding Academic Performance) and have qualified the GATE examination in Data Science and Artificial Intelligence.
+  superpowers:
+    - "Design and operation of end-to-end LLM training data pipelines, including deduplication, sanity validation, and reproducible dataset versioning."
+    - "Multi-agent and workflow orchestration integrating large language models with deterministic automation and browser-based validation where appropriate."
+    - "Retrieval-augmented generation architecture: dense retrieval, embedding strategies, and structured outputs suitable for professional and compliance-sensitive contexts."
+    - "Domain adaptation for scientific and financial text, including regulatory filings, earnings communications, and related unstructured corpora."
+  proof_points:
+    # URLs point to authoritative or professional references only (not GitHub project pages).
+    - name: "SparLM — finance analyst intelligence platform (live product)"
+      url: "https://www.linkedin.com/in/abhay-santhani"
+      hero_metric: "Co-developed the artificial intelligence backend for month-on-month analytical reporting from pitch materials and earnings calls; implemented semantic retrieval with Qdrant, cross-document inconsistency review with a large language model, and relational persistence for auditability."
+    - name: "FoRMLM — pharmaceutical and financial domain LLM data infrastructure"
+      url: "https://www.linkedin.com/in/abhay-santhani"
+      hero_metric: "Architected ingestion and preparation of large-scale regulatory text for parameter-efficient and domain-adaptive training; delivered layout-preserving portable document parsing, synthetic supervised fine-tuning generation, and lifecycle-managed corpora on object storage."
+    - name: "Agentic quality assurance automation — e-commerce"
+      url: "https://www.linkedin.com/in/abhay-santhani"
+      hero_metric: "Delivered an end-to-end agentic testing framework combining orchestration graphs with browser automation; post-deployment, the quality assurance organization reported a substantial reduction in repetitive manual test execution."
+    - name: "MemoryFolio — face recognition and clustering (academic)"
+      url: "https://www.linkedin.com/in/abhay-santhani"
+      hero_metric: "Implemented convolutional neural network architectures in PyTorch for identification and clustering; achieved strong accuracy on a curated academic benchmark through systematic preprocessing and model selection."
+    - name: "CERN Open Data — di-electron collision anomaly analysis"
+      url: "https://opendata.cern.ch/"
+      hero_metric: "Applied unsupervised methods including self-organising maps, restricted Boltzmann machines, and isolation-based anomaly detection to high-energy physics open data in order to surface atypical collision-event patterns."
+  # Optional: uncomment if you publish a candidate demo dashboard.
+  # dashboard:
+  #   url: "https://example.com/demo"
+  #   password: "shared-secret"
+
+compensation:
+  target_range: "INR 22–38 LPA (India domestic roles); open to discussion for internationally denominated remote positions."
+  currency: "INR"
+  minimum: "INR 18 LPA (walk-away floor; adjust to reflect your requirements)."
+  location_flexibility: "Hyderabad on-site or hybrid; India-wide remote considered; selective international remote where eligibility and role scope align."
+
+location:
+  country: "India"
+  city: "Hyderabad"
+  timezone: "Asia/Kolkata"
+  visa_status: "Indian citizen. Domestic hiring by default; sponsorship requirements to be evaluated per jurisdiction and employer policy."
+  onsite_availability: "Hybrid arrangements within Hyderabad; limited domestic travel (for example Bengaluru) when justified by role responsibilities."
+
+cv:
+  output_format: "html"
+  # Optional: set after you create a Canva resume design for /career-ops pdf visual export.
+  # canva_resume_design_id: "DAxxxxxxxxx"

@@ -1,0 +1,46 @@
+# Generated and local pipeline data
+data/applications.md
+data/pipeline.md
+data/scan-history.tsv
+reports/*.md
+!reports/.gitkeep
+output/*
+!output/.gitkeep
+batch/logs/*
+!batch/logs/.gitkeep
+batch/batch-state.tsv
+batch/batch-input.tsv
+batch/tracker-additions/**/*.tsv
+!batch/tracker-additions/.gitkeep
+jds/*
+!jds/.gitkeep
+
+# Personal writing samples (keep README only)
+writing-samples/*
+!writing-samples/README.md
+
+# Local update / lock state
+.update-dismissed
+.update-lock
+
+# Secrets and local Python env
+.env
+.venv/
+
+# Tooling / caches
+.resolved-prompt-*
+node_modules/
+bun.lock
+
+# OS and media
+.DS_Store
+Thumbs.db
+*.mov
+*.mp4
+
+# Claude Code local overrides
+.claude/settings.local.json
+.claude/memory/
+
+# Go dashboard binary (build artifact)
+career-dashboard
