@@ -1,5 +1,4 @@
-# Personal data (user fills these)
-cv.md
+# Generated and local pipeline data
 data/applications.md
 data/pipeline.md
 data/scan-history.tsv
@@ -16,32 +15,32 @@ batch/tracker-additions/**/*.tsv
 jds/*
 !jds/.gitkeep
 
-# Writing samples (user's personal files — never committed)
+# Personal writing samples (keep README only)
 writing-samples/*
 !writing-samples/README.md
 
-# User config and customization (never auto-updated)
-config/profile.yml
-portals.yml
-modes/_profile.md
+# Local update / lock state
 .update-dismissed
 .update-lock
 
-# Secrets (never commit — use .env.example as template)
+# Secrets and local Python env
 .env
+.venv/
 
-# Generated
+# Tooling / caches
 .resolved-prompt-*
 node_modules/
 bun.lock
 
-# OS
+# OS and media
 .DS_Store
+Thumbs.db
 *.mov
 *.mp4
 
-# Claude Code local
+# Claude Code local overrides
 .claude/settings.local.json
 .claude/memory/
+
+# Go dashboard binary (build artifact)
 career-dashboard
-package-lock.json
