@@ -1,0 +1,5 @@
+# Keep secrets and heavy deps out of Gemini context even when respectGitIgnore is off.
+.env
+**/.env
+node_modules/
+.venv/

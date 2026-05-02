@@ -185,9 +185,22 @@ function loadSeenCompanyRoles() {
 
 // ── Pipeline writer ─────────────────────────────────────────────────
 
+function ensurePipelineFile() {
+  if (existsSync(PIPELINE_PATH)) return;
+  const initial = `# Job URL inbox (Career-Ops)
+
+## Pendientes
+
+## Procesadas
+
+`;
+  writeFileSync(PIPELINE_PATH, initial, 'utf-8');
+}
+
 function appendToPipeline(offers) {
   if (offers.length === 0) return;
 
+  ensurePipelineFile();
   let text = readFileSync(PIPELINE_PATH, 'utf-8');
 
   // Find "## Pendientes" section and append after it

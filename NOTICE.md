@@ -1,7 +1,5 @@
-# Fork notice
+# Notice
 
-This repository ([Careers-Ops](https://github.com/Ronderjohn/Careers-Ops)) is a personal fork and customization of [career-ops](https://github.com/santifer/career-ops) by Santiago Fernández de Valderrama.
+This project is distributed under the **MIT License** — see [LICENSE](LICENSE) for the full text.
 
-The original project is released under the **MIT License**; see `LICENSE` for the full text and copyright notice. Your use of this fork is also governed by that license unless you replace it with your own terms for material you wholly own.
-
-Upstream project: https://github.com/santifer/career-ops
+Some documentation and workflow ideas build on prior open-source **career-ops**-style tooling in the community; your checkout may include additional local changes. When in doubt, rely on the `LICENSE` and files in this repository.

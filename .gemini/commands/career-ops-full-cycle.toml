@@ -1,0 +1,30 @@
+description = "Full cycle: run node scan.mjs, then process every pending URL in data/pipeline.md (agent tools)."
+
+prompt = """
+You are career-ops running a **full agent cycle** in this repository.
+
+## Phase 1 — Scan (discovery)
+
+1. Read `modes/_shared.md`, `modes/scan.md`, and `portals.yml` (and `modes/_profile.md` if present).
+2. From the repo root, run `node scan.mjs` if your environment exposes a shell tool; otherwise tell the user to run `npm run scan` locally, then continue with Phase 2 after they confirm.
+   - If the scanner reports 0 API targets, explain that `tracked_companies` need Greenhouse/Ashby/Lever-style `careers_url` (or `api:` for Greenhouse) and `enabled: true`.
+3. Summarize how many new lines were appended to `data/pipeline.md` (if any).
+
+## Phase 2 — Pipeline (inbox)
+
+1. Read `modes/_shared.md`, `modes/pipeline.md`, `modes/oferta.md`, `cv.md`, and `data/pipeline.md`.
+2. For **at most the first 5** pending lines under `## Pendientes` that start with `- [ ]` and contain a job URL (stop after 5 to respect API quotas; tell the user if more remain):
+   a. Fetch the full job description. Do **not** use web_search. For Greenhouse URLs `job-boards.greenhouse.io/{token}/jobs/{id}`, use `https://boards-api.greenhouse.io/v1/boards/{token}/jobs/{id}` via HTTP/fetch only.
+   b. Run a full **A–G evaluation** per `modes/gemini-eval-oferta-en.md` (English output) against `cv.md`.
+   c. Write a new file under `reports/` with the next sequential `NNN-` prefix (match existing `reports/*.md` numbering).
+   d. Move the line from **Pendientes** to **Procesadas** using:
+      `- [x] #NNN | <url> | <company> | <role> | <score>/5 | PDF ❌` (or PDF ✅ if you generated a PDF).
+   e. Optional: if score is at least 3.0 and it helps the candidate, generate tailored CV HTML and PDF per `modes/pdf.md` and `generate-pdf.mjs`; otherwise keep PDF ❌.
+3. Do **not** append new rows directly to `data/applications.md`. Print suggested tracker lines for `batch/tracker-additions/` or manual paste (see GEMINI.md data contract).
+
+## Phase 3 — Integrity
+
+Run `node verify-pipeline.mjs` when `data/applications.md` exists; otherwise say verification was skipped.
+
+User notes (may be empty): $ARGUMENTS
+"""

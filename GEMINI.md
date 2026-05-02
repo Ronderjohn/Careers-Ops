@@ -33,6 +33,16 @@ Parse the JSON output:
 - `{"status": "up-to-date"}` → say nothing
 - `{"status": "dismissed"}` or `{"status": "offline"}` → say nothing
 
+## Gemini CLI — agent mode vs headless
+
+- **YOLO / auto tools:** Pass `--approval-mode yolo` (or `-y`) so the agent can edit files and run tools without per-step approval (see `npm run gemini:agent:*` in `package.json`).
+- **Gitignored inbox:** `data/pipeline.md` and other pipeline files are in `.gitignore`. This repo sets `context.fileFiltering.respectGitIgnore` to `false` in `.gemini/settings.json` so the agent can read them. `.geminiignore` still excludes `.env` and `node_modules/`.
+- **Headless limits:** In some environments (for example `TERM=dumb` or CI), Gemini CLI may not expose `run_shell_command`, so `node scan.mjs` cannot run inside the agent. Use **interactive** `gemini` from a normal terminal in the repo root for the fullest tool set, or run `npm run scan` yourself then `/career-ops-pipeline` in Gemini.
+- **Quota:** Full-cycle and WebSearch burn TPM quickly on the free tier. Prefer Greenhouse `boards-api` JSON over web_search for JDs.
+- **Default model (Gemma 4):** `.gemini/settings.json` and `gemini-eval.mjs` default to `gemma-4-26b-a4b-it` (Gemini API). Override with `GEMINI_MODEL` (e.g. `gemma-4-31b-it` or a `gemini-*` Flash) if your key returns 404 or quota errors.
+- **English reports:** `gemini-eval.mjs` uses `modes/gemini-eval-oferta-en.md` so evaluations saved under `reports/` are in English. (`modes/oferta.md` stays Spanish for Claude/Gemini slash flows that expect it.)
+- **Quota-friendly batching:** `gemini-pipeline.mjs` defaults to `--limit 5`, pauses **2.5s** between evals (override with `GEMINI_PIPELINE_LIMIT`, `GEMINI_PIPELINE_SLEEP_MS`). Enable paid billing separately when you are ready.
+
 ## Gemini CLI Commands
 
 When using [Gemini CLI](https://github.com/google-gemini/gemini-cli), the following slash commands are available (defined in `.gemini/commands/`):
@@ -51,6 +61,7 @@ When using [Gemini CLI](https://github.com/google-gemini/gemini-cli), the follow
 | `/career-ops-tracker` | `/career-ops tracker` | Application status overview |
 | `/career-ops-apply` | `/career-ops apply` | Live application assistant |
 | `/career-ops-scan` | `/career-ops scan` | Scan portals for new offers |
+| `/career-ops-full-cycle` | (combined) | Run `node scan.mjs` when possible, then process pending pipeline URLs (see `.gemini/commands/career-ops-full-cycle.toml`) |
 | `/career-ops-batch` | `/career-ops batch` | Batch processing |
 | `/career-ops-patterns` | `/career-ops patterns` | Analyze rejection patterns |
 | `/career-ops-followup` | `/career-ops followup` | Follow-up cadence tracker |

@@ -18,6 +18,8 @@ All scripts live in the project root as `.mjs` modules and are exposed via `npm 
 | `npm run rollback` | `update-system.mjs rollback` | Rollback last update |
 | `npm run liveness` | `check-liveness.mjs` | Test if job URLs are still active |
 | `npm run scan` | `scan.mjs` | Zero-token portal scanner |
+| `npm run gemini:eval` | `gemini-eval.mjs` | Evaluate a JD via Gemini API (English mode file) |
+| `npm run gemini:pipeline` | `gemini-pipeline.mjs` | Fetch pending URLs, run eval, update `data/pipeline.md` |
 
 ---
 
@@ -187,3 +189,26 @@ npm run scan
 ```
 
 **Exit codes:** `0` scan completed, `1` configuration error or no portals.yml found.
+
+---
+
+## gemini-eval & gemini-pipeline
+
+`gemini-eval.mjs` loads **`modes/gemini-eval-oferta-en.md`** (English evaluation spec) plus `modes/_shared.md` and `cv.md`, then calls the Generative Language API. Reports are written to `reports/` when not using `--no-save`.
+
+`gemini-pipeline.mjs` pulls JD text (Greenhouse/Lever JSON when possible), invokes `gemini-eval.mjs` for each pending `- [ ]` line in `data/pipeline.md`, and moves processed rows to **Procesadas**.
+
+**Quota-friendly defaults**
+
+| Env | Default | Purpose |
+|-----|---------|---------|
+| `GEMINI_PIPELINE_LIMIT` | `5` | Max pending jobs per run when `--limit` is omitted |
+| `GEMINI_PIPELINE_SLEEP_MS` | `2500` | Pause between successful evals (set `0` to disable) |
+| `GEMINI_EVAL_MODEL` | (unset) | Model id for evals; falls back to `GEMINI_MODEL` then Gemma 4 |
+
+```bash
+npm run gemini:pipeline -- --limit 3
+GEMINI_PIPELINE_SLEEP_MS=5000 node gemini-pipeline.mjs --limit 2
+```
+
+**Billing:** Free-tier RPM/TPM still apply; raising limits requires a billed Google Cloud / AI Studio project (configure outside this repo).

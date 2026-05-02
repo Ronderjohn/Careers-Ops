@@ -5,7 +5,7 @@
  * Checks all prerequisites and prints a pass/fail checklist.
  */
 
-import { existsSync, mkdirSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -149,6 +149,35 @@ function checkAutoDir(name) {
   }
 }
 
+function ensureApplicationsTracker() {
+  const p = join(projectRoot, 'data', 'applications.md');
+  if (existsSync(p)) {
+    return { pass: true, label: 'data/applications.md present' };
+  }
+  try {
+    mkdirSync(join(projectRoot, 'data'), { recursive: true });
+    writeFileSync(
+      p,
+      `# Applications Tracker
+
+| # | Date | Company | Role | Score | Status | PDF | Report | Notes |
+|---|------|---------|------|-------|--------|-----|--------|-------|
+`,
+      'utf-8'
+    );
+    return {
+      pass: true,
+      label: 'data/applications.md created (empty — merge-tracker will append rows)',
+    };
+  } catch (e) {
+    return {
+      pass: false,
+      label: 'Could not create data/applications.md',
+      fix: String(e?.message || e),
+    };
+  }
+}
+
 async function main() {
   console.log('\ncareer-ops doctor');
   console.log('================\n');
@@ -162,6 +191,7 @@ async function main() {
     checkPortals(),
     checkFonts(),
     checkAutoDir('data'),
+    ensureApplicationsTracker(),
     checkAutoDir('output'),
     checkAutoDir('reports'),
   ];

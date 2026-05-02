@@ -14,19 +14,23 @@
  * Requires:
  *   GEMINI_API_KEY in .env (or environment variable)
  *
- * Free-tier model: gemini-2.0-flash (generous quota, no billing required)
+ * Default model: gemma-4-26b-a4b-it (Gemma 4 on Gemini API — AI Studio key).
+ * Model resolution: --model flag > GEMINI_EVAL_MODEL > GEMINI_MODEL > default (Gemma 4 26B).
+ * Use GEMINI_EVAL_MODEL in .env when Gemini CLI should use a different model than job evals.
  */
 
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+const ROOT = dirname(fileURLToPath(import.meta.url));
+
 // ---------------------------------------------------------------------------
-// Bootstrap: load .env before anything else
+// Bootstrap: load .env from repo root (not process.cwd())
 // ---------------------------------------------------------------------------
 try {
   const { config } = await import('dotenv');
-  config();
+  config({ path: join(ROOT, '.env') });
 } catch {
   // dotenv is optional — fall back to process.env if not installed
 }
@@ -36,12 +40,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // ---------------------------------------------------------------------------
 // Paths
 // ---------------------------------------------------------------------------
-const ROOT = dirname(fileURLToPath(import.meta.url));
+
+const OFERTA_EN = join(ROOT, 'modes', 'gemini-eval-oferta-en.md');
+const OFERTA_ES = join(ROOT, 'modes', 'oferta.md');
 
 const PATHS = {
-  // Primary evaluation logic lives in these two mode files
   shared:   join(ROOT, 'modes', '_shared.md'),
-  oferta:   join(ROOT, 'modes', 'oferta.md'),
   // Canonical skill path referenced in Issue #344
   evaluate: join(ROOT, '.claude', 'skills', 'career-ops', 'SKILL.md'),
   cv:       join(ROOT, 'cv.md'),
@@ -65,11 +69,11 @@ if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
   USAGE
     node gemini-eval.mjs "<JD text>"
     node gemini-eval.mjs --file ./jds/my-job.txt
-    node gemini-eval.mjs --model gemini-2.0-flash "<JD text>"
+    node gemini-eval.mjs --model gemini-1.5-flash "<JD text>"
 
   OPTIONS
     --file <path>    Read JD from a file instead of inline text
-    --model <name>   Gemini model to use (default: gemini-2.0-flash)
+    --model <name>   Model id (overrides GEMINI_EVAL_MODEL / GEMINI_MODEL; try gemma-4-31b-it)
     --no-save        Do not save report to reports/ directory
     --help           Show this help
 
@@ -87,7 +91,9 @@ if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
 
 // Parse flags
 let jdText = '';
-let modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const DEFAULT_MODEL = 'gemma-4-26b-a4b-it';
+let modelName =
+  process.env.GEMINI_EVAL_MODEL || process.env.GEMINI_MODEL || DEFAULT_MODEL;
 let saveReport = true;
 
 for (let i = 0; i < args.length; i++) {
@@ -164,7 +170,8 @@ if (!readdirSync) {
 console.log('\n📂  Loading context files...');
 
 const sharedContext  = readFile(PATHS.shared,   'modes/_shared.md');
-const ofertaLogic    = readFile(PATHS.oferta,   'modes/oferta.md');
+const ofertaPath = existsSync(OFERTA_EN) ? OFERTA_EN : OFERTA_ES;
+const ofertaLogic  = readFile(ofertaPath, 'modes/gemini-eval-oferta-en.md (or oferta.md fallback)');
 const cvContent      = readFile(PATHS.cv,       'cv.md');
 
 // ---------------------------------------------------------------------------
@@ -197,7 +204,7 @@ IMPORTANT OPERATING RULES FOR THIS CLI SESSION
    - For Block D (Comp research): provide salary estimates based on your training data, clearly noted as estimates.
    - For Block G (Legitimacy): analyze the JD text only; skip URL/page freshness checks.
    - Post-evaluation file saving is handled by the script, not by you.
-2. Generate Blocks A through G in full, in English, unless the JD is in another language.
+2. **Language:** Write Blocks A–G, all tables, headers, gap strategies, and keywords in **English** only. Do not use Spanish or other languages for section prose (mode files may contain Spanish examples — ignore their language for your output).
 3. At the very end, output a machine-readable summary block in this exact format:
 
 ---SCORE_SUMMARY---
@@ -215,8 +222,14 @@ LEGITIMACY: <High Confidence | Proceed with Caution | Suspicious>
 console.log(`🤖  Calling Gemini (${modelName})... this may take 30-60 seconds.\n`);
 
 const genAI = new GoogleGenerativeAI(apiKey);
+// Gemma 4 on the Gemini API expects system text via systemInstruction (see
+// https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api). A two-part
+// user payload can return 400 "unexpected model name format" for some requests.
+const useGemmaLayout = /^gemma-/i.test(modelName);
+
 const model = genAI.getGenerativeModel({
   model: modelName,
+  ...(useGemmaLayout ? { systemInstruction: systemPrompt } : {}),
   generationConfig: {
     temperature: 0.4,      // deterministic enough for structured evaluation
     maxOutputTokens: 8192, // full 7-block evaluation
@@ -225,10 +238,12 @@ const model = genAI.getGenerativeModel({
 
 let evaluationText;
 try {
-  const result = await model.generateContent([
-    { text: systemPrompt },
-    { text: `\n\nJOB DESCRIPTION TO EVALUATE:\n\n${jdText}` },
-  ]);
+  const result = useGemmaLayout
+    ? await model.generateContent(`JOB DESCRIPTION TO EVALUATE:\n\n${jdText}`)
+    : await model.generateContent([
+        { text: systemPrompt },
+        { text: `\n\nJOB DESCRIPTION TO EVALUATE:\n\n${jdText}` },
+      ]);
   evaluationText = result.response.text();
 } catch (err) {
   console.error('❌  Gemini API error:', err.message);
@@ -251,9 +266,19 @@ console.log(evaluationText);
 // ---------------------------------------------------------------------------
 // Parse score summary
 // ---------------------------------------------------------------------------
-const summaryMatch = evaluationText.match(
-  /---SCORE_SUMMARY---\s*([\s\S]*?)---END_SUMMARY---/
-);
+function extractScoreSummaryBlock(text) {
+  const strict = text.match(
+    /---SCORE_SUMMARY---\s*([\s\S]*?)---END_SUMMARY---/
+  );
+  if (strict) return strict[1];
+  // Gemma (and some models) omit exact delimiters; accept a loose block.
+  const loose = text.match(
+    /\bSCORE_SUMMARY\b\s*([\s\S]*?)\bEND_SUMMARY\b/i
+  );
+  return loose ? loose[1] : null;
+}
+
+const summaryBlock = extractScoreSummaryBlock(evaluationText);
 
 let company    = 'unknown';
 let role       = 'unknown';
@@ -261,8 +286,8 @@ let score      = '?';
 let archetype  = 'unknown';
 let legitimacy = 'unknown';
 
-if (summaryMatch) {
-  const block = summaryMatch[1];
+if (summaryBlock) {
+  const block = summaryBlock;
   const extract = (key) => {
     const m = block.match(new RegExp(`${key}:\\s*(.+)`));
     return m ? m[1].trim() : 'unknown';
@@ -300,7 +325,10 @@ if (saveReport) {
 
 ---
 
-${evaluationText.replace(/---SCORE_SUMMARY---[\s\S]*?---END_SUMMARY---/, '').trim()}
+${evaluationText
+      .replace(/---SCORE_SUMMARY---[\s\S]*?---END_SUMMARY---/, '')
+      .replace(/\bSCORE_SUMMARY\b[\s\S]*?\bEND_SUMMARY\b/gi, '')
+      .trim()}
 `;
 
     writeFileSync(reportPath, reportContent, 'utf-8');

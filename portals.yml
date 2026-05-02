@@ -837,6 +837,7 @@ tracked_companies:
   - name: Anthropic
     careers_url: https://job-boards.greenhouse.io/anthropic
     api: https://boards-api.greenhouse.io/v1/boards/anthropic/jobs
+    # Set enabled: true when you want npm run scan to pull Greenhouse JSON into data/pipeline.md
     enabled: false
 
   - name: OpenAI

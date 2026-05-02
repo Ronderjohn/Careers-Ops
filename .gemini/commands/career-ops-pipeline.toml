@@ -13,5 +13,12 @@ Load the pipeline context:
 Then execute pipeline mode as defined in modes/pipeline.md.
 Process each pending URL in data/pipeline.md, evaluate it, and update the tracker.
 
+CRITICAL — avoid quota burn:
+- Do **not** use web_search for job text. For `job-boards.greenhouse.io/{board}/jobs/{id}` URLs, use the public JSON at `https://boards-api.greenhouse.io/v1/boards/{board}/jobs/{id}` (read via your HTTP/fetch capability, or read_file if the JD was saved to a repo path).
+- Prefer read_file on `data/pipeline.md` (project sets respectGitIgnore off so this file is readable).
+
+Output language:
+- Write every report under `reports/` in **English** (headings, tables, narrative). Follow `modes/gemini-eval-oferta-en.md` for structure when evaluating.
+
 Additional arguments (if any): $ARGUMENTS
 """

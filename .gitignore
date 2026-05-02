@@ -10,7 +10,9 @@ batch/logs/*
 !batch/logs/.gitkeep
 batch/batch-state.tsv
 batch/batch-input.tsv
+# Tracker merge queue (TSVs moved to merged/ after node merge-tracker.mjs)
 batch/tracker-additions/**/*.tsv
+batch/tracker-additions/*.tsv
 !batch/tracker-additions/.gitkeep
 jds/*
 !jds/.gitkeep
@@ -28,6 +30,7 @@ writing-samples/*
 .venv/
 
 # Tooling / caches
+.cache/
 .resolved-prompt-*
 node_modules/
 bun.lock
